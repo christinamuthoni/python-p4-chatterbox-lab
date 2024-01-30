@@ -16,11 +16,74 @@ db.init_app(app)
 
 @app.route('/messages')
 def messages():
-    return ''
+
+    messages = []
+    for message in Message.query.all():
+        message_dict = {
+            "id":message.id,
+            "body": message.body,
+            "username": message.username,
+        }
+        messages.append(message_dict)
+    
+    response = make_response(jsonify(messages), 200) 
+    return response   
 
 @app.route('/messages/<int:id>')
 def messages_by_id(id):
-    return ''
+    message = Message.query.filter_by(id=id).first()
+
+    message_dict = message.to_dict()
+    message_dict = {
+        "id": message.id, 
+        "body": message.body,
+        "username": message.username,
+    }
+
+    response= make_response(jsonify(message_dict), 200)
+
+    response.headers["Content-Type"] = "application/json"
+
+    return response
+
+@app.route('/messages_order')
+def get_messages():
+    ordered_messages = Message.query.order_by(Message.created_at.asc()).all()
+
+    messages = []
+    for message in ordered_messages:
+        message_dict = {
+            "id":message.id,
+            "body": message.body,
+            "username": message.username,
+            "created_at": message.created_at,
+        }
+        messages.append(message_dict)
+    
+    response = make_response(jsonify(messages), 200) 
+    return response   
+
+@app.route('/messages', methods=['GET','POST'])
+def add_new_message():
+
+    if request.method == 'GET':
+        messages = []
+        for message in Message.query.all():
+            message_dict = message.to_dict()
+            messages.append(message_dict)
+
+        response = make_response(
+            jsonify(messages),
+            200
+        )
+
+        return response   
+
+    elif request.method == 'POST' :
+        response_body = {}
+        response = make_response(response_body, 201)
+        return response
+
 
 if __name__ == '__main__':
-    app.run(port=5555)
+    app.run(port=5558)
