@@ -80,10 +80,24 @@ def add_new_message():
         return response   
 
     elif request.method == 'POST' :
-        response_body = {}
-        response = make_response(response_body, 201)
+        # response_body = {}
+        data= request.get_json()
+        username = data.get('username')
+        body = data.get('body')
+
+        new_record= Message(username=username, body=body)
+        db.session.add(new_record)
+        db.session.commit()
+
+        # new_record= {
+        #     "body" : request.form["body"],
+        #     "username" : request.form["username"]
+        # }
+
+        
+        response = make_response(new_record.to_dict(), 201)
         return response
 
 
 if __name__ == '__main__':
-    app.run(port=5558)
+    app.run(port=5500)
